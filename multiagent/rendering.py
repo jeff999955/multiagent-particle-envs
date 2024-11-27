@@ -60,7 +60,7 @@ class Viewer(object):
         glEnable(GL_LINE_SMOOTH)
         # glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE)
         glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
-        glLineWidth(2.0)
+        glLineWidth(1.0)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def close(self):
@@ -98,14 +98,8 @@ class Viewer(object):
         if return_rgb_array:
             buffer = pyglet.image.get_buffer_manager().get_color_buffer()
             image_data = buffer.get_image_data()
-            arr = np.fromstring(image_data.data, dtype=np.uint8, sep='')
-            # In https://github.com/openai/gym-http-api/issues/2, we
-            # discovered that someone using Xmonad on Arch was having
-            # a window of size 598 x 398, though a 600 x 400 window
-            # was requested. (Guess Xmonad was preserving a pixel for
-            # the boundary.) So we use the buffer height/width rather
-            # than the requested one.
-            arr = arr.reshape(buffer.height, buffer.width, 4)
+            arr = np.frombuffer(image_data.data, dtype=np.uint8)
+            arr = arr.reshape(self.height, self.width, 4)
             arr = arr[::-1,:,0:3]
         self.window.flip()
         self.onetime_geoms = []
@@ -140,7 +134,7 @@ class Viewer(object):
         self.window.flip()
         image_data = pyglet.image.get_buffer_manager().get_color_buffer().get_image_data()
         self.window.flip()
-        arr = np.fromstring(image_data.data, dtype=np.uint8, sep='')
+        arr = np.frombuffer(image_data.data, dtype=np.uint8)
         arr = arr.reshape(self.height, self.width, 4)
         return arr[::-1,:,0:3]
 
